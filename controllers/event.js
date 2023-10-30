@@ -18,6 +18,26 @@ const CREATE_EVENT = async (req, res) => {
   }
 };
 
+const GET_EVENTS = async (req, res) => {
+  try {
+    const response = await EventModel.find();
+    return res.send({ events: response });
+  } catch (err) {
+    console.log("ERROR: ", err);
+    res.status(500).json({ response: "Something went wrong!" });
+  }
+};
+
+const GET_EVENTS_BY_ID = async (req, res) => {
+  try {
+    const response = await EventModel.findById(req.params.id);
+    return res.json({ Event: response });
+  } catch (err) {
+    console.log("ERROR: ", err);
+    res.status(500).json({ response: "Something went wrong!" });
+  }
+};
+
 const JOIN_EVENT = async (req, res) => {
   try {
     const event = await EventModel.findById(req.params.id);
@@ -37,4 +57,38 @@ const JOIN_EVENT = async (req, res) => {
     res.status(500).json({ message: "Something went wrong" });
   }
 };
-export { CREATE_EVENT, JOIN_EVENT };
+
+const UPDATE_EVENT = async (req, res) => {
+  try {
+    const eventResponse = await EventModel.updateOne(
+      { _id: req.params.id },
+      { ...req.body }
+    );
+    return res
+      .status(200)
+      .json({ status: "Event was updated", response: eventResponse });
+  } catch (err) {
+    console.log("ERROR: ", err);
+    res.status(500).json({ response: "Something went wrong!" });
+  }
+};
+
+const DELETE_EVENT = async (req, res) => {
+  try {
+    const eventResponse = await EventModel.findByIdAndDelete(req.params.id);
+    return res
+      .status(200)
+      .json({ response: eventResponse, status: "Event was delete" });
+  } catch (err) {
+    console.log("ERROR: ", err);
+    res.status(500).json({ response: "Something went wrong!" });
+  }
+};
+export {
+  CREATE_EVENT,
+  GET_EVENTS,
+  GET_EVENTS_BY_ID,
+  JOIN_EVENT,
+  DELETE_EVENT,
+  UPDATE_EVENT,
+};

@@ -13,6 +13,7 @@ const REGISTER_USER = async (req, res) => {
       skills: req.body.skills,
       password: hash,
     });
+    user.id = user._id;
     const response = await user.save();
 
     return res

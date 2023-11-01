@@ -1,4 +1,5 @@
 import EventModel from "../models/event.js";
+import mongoose from "mongoose";
 
 const CREATE_EVENT = async (req, res) => {
   try {
@@ -28,15 +29,35 @@ const GET_EVENTS = async (req, res) => {
   }
 };
 
-const GET_EVENTS_BY_ID = async (req, res) => {
+const GET_EVENTS_BY_ID_USERS = async (req, res) => {
   try {
-    const response = await EventModel.findById(req.params.id);
-    return res.json({ Event: response });
+    const response = await EventModel.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "visitors",
+          foreignField: "id",
+          as: "event_visitors",
+        },
+      },
+      { $match: { _id: new mongoose.Types.ObjectId(req.params.id) } },
+    ]);
+    return res.status(200).json({ Event: response });
   } catch (err) {
     console.log("ERROR: ", err);
     res.status(500).json({ response: "Something went wrong!" });
   }
 };
+
+// const GET_EVENTS_BY_ID = async (req, res) => {
+//   try {
+//     const response = await EventModel.findById(req.params.id);
+//     return res.status(200).json({ Event: response });
+//   } catch (err) {
+//     console.log("ERROR: ", err);
+//     res.status(500).json({ response: "Something went wrong!" });
+//   }
+// };
 
 const JOIN_EVENT = async (req, res) => {
   try {
@@ -49,7 +70,6 @@ const JOIN_EVENT = async (req, res) => {
       { _id: event._id },
       { $push: { visitors: req.body.userId } }
     ).exec();
-    console.log(req.body.userId);
 
     res.status(200).json({ message: "Event was join" });
   } catch (err) {
@@ -87,7 +107,8 @@ const DELETE_EVENT = async (req, res) => {
 export {
   CREATE_EVENT,
   GET_EVENTS,
-  GET_EVENTS_BY_ID,
+  // GET_EVENTS_BY_ID,
+  GET_EVENTS_BY_ID_USERS,
   JOIN_EVENT,
   DELETE_EVENT,
   UPDATE_EVENT,
